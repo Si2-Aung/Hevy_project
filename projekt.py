@@ -6,7 +6,6 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 
-
 # Setzt die Seitenkonfiguration
 st.set_page_config(page_title="Hevy Dashboard")
 
@@ -35,4 +34,4 @@ if csv_file is not None:
         st.error(f"Es gab ein Problem beim Lesen der Datei: {e}")
 else:
     # Anweisung, wenn keine Datei hochgeladen wurde
-    st.info("Bitte lade eine CSV-Datei hoch, um fortzufahren.")
+    st.info("Bitte lade eine CSV-Datei hoch, um fortzufahren..")
