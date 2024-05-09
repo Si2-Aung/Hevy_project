@@ -4,14 +4,31 @@ import plotly.express as px
 import seaborn as sns
 import matplotlib.pyplot as plt
 
+
+
 # Set the page configuration
 st.set_page_config(
     page_title="Hevy Dashboard",
     page_icon="🏋️"
 )
+
+# Set the background image
+background_image = """
+<style>
+[data-testid="stAppViewContainer"] > .main {
+    background-image: url("https://wallpapercave.com/wp/wp12424948.jpg");
+    background-position: center;  
+    background-repeat: no-repeat;
+}
+</style>
+"""
+st.markdown(background_image, unsafe_allow_html=True)
+
+
 st.sidebar.success("Select a page above")
 # Create headers
 st.title("Main Page")
+
 df = None
 # Allow the user to upload a CSV file
 if st.session_state.get('uploaded_data') is None:
