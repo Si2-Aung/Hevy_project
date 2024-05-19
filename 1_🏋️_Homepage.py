@@ -3,8 +3,7 @@ import streamlit as st
 import plotly.express as px
 import seaborn as sns
 import matplotlib.pyplot as plt
-
-
+import streamlit_shadcn_ui as ui
 
 # Set the page configuration
 st.set_page_config(
@@ -12,11 +11,14 @@ st.set_page_config(
     page_icon="🏋️"
 )
 
-# Set the background image
+st.sidebar.success("Select a page above")
+# Create headers
+
+# CSS for background image
 background_image = """
 <style>
 [data-testid="stAppViewContainer"] > .main {
-    background-image: url("https://wallpapercave.com/wp/wp12424948.jpg");
+    background-image: url("");
     background-position: center;  
     background-repeat: no-repeat;
 }
@@ -24,60 +26,67 @@ background_image = """
 """
 st.markdown(background_image, unsafe_allow_html=True)
 
+# Function to calculate total workouts
+def calculate_total_workouts(workout_data):
+    return str(workout_data['start_time'].nunique())
 
-st.sidebar.success("Select a page above")
-# Create headers
-st.title("Main Page")
+# Function to calculate average workout duration
+def calculate_average_duration(workout_data):
+    # Processing datetime data
+    workout_data['start_time'] = pd.to_datetime(workout_data['start_time'], format="%d %b %Y, %H:%M", dayfirst=True)
+    workout_data['end_time'] = pd.to_datetime(workout_data['end_time'], format="%d %b %Y, %H:%M", dayfirst=True)
+    # Calculate duration in minutes for each workout
+    workout_data['duration_minutes'] = (workout_data['end_time'] - workout_data['start_time']).dt.total_seconds() / 60
+    result = str(round(workout_data['duration_minutes'].mean()))+ " minutes"
+    return result
 
-df = None
+# Function to calculate longest streak
+def calculate_longest_streak(workout_data):
+    workout_data['workout_week'] = workout_data['start_time'].dt.isocalendar().week
+    workout_data['workout_year'] = workout_data['start_time'].dt.isocalendar().year
+    workout_data['year_week'] = workout_data['workout_year'].astype(str) + "-" + workout_data['workout_week'].astype(str)
+    
+    streaks = workout_data['year_week'].value_counts().sort_index().index
+    longest_streak = 1
+    current_streak = 1
+    
+    for i in range(1, len(streaks)):
+        if int(streaks[i].split("-")[1]) - int(streaks[i-1].split("-")[1]) == 1:
+            current_streak += 1
+        else:
+            longest_streak = max(longest_streak, current_streak)
+            current_streak = 1
+    return str(max(longest_streak, current_streak))
+
+
 # Allow the user to upload a CSV file
-if st.session_state.get('uploaded_data') is None:
-    csv_file = st.file_uploader("Upload csv", type="csv")
-    st.write("No file uploaded yet.")
+csv_file = st.file_uploader("Upload your Hevy-CSV file",type="csv")
 
-    if csv_file is not None:
-        st.success("Datei erfolgreich hochgeladen!")
-        df = pd.read_csv(csv_file)
-        st.session_state['uploaded_data'] = df
-        st.write("File uploaded and saved in session state successfully!")
-
+if csv_file is not None:
+    st.success("Datei erfolgreich hochgeladen!")
+    workout_data = pd.read_csv(csv_file)
+    st.session_state['uploaded_data'] = workout_data
 else:
-    df = st.session_state.get('uploaded_data')
+    if 'uploaded_data' in st.session_state:
+        workout_data = st.session_state['uploaded_data']
+    else:
+        workout_data = None
 
-if df is not None:
+if workout_data is not None:
     try:
-        st.session_state['uploaded_data'] = df
-        st.write("File uploaded and saved in session state successfully!")
-
-        # Processing datetime data
-        df['start_time'] = pd.to_datetime(df['start_time'])
-        df['end_time'] = pd.to_datetime(df['end_time'])
+        st.header("Overview")
+    
+        total_workouts = calculate_total_workouts(workout_data)
+        average_duration = calculate_average_duration(workout_data)
+        longest_streak = calculate_longest_streak(workout_data)
         
-        # Calculate duration in minutes for each workout
-        df['duration_minutes'] = (df['end_time'] - df['start_time']).dt.total_seconds() / 60
-        
-        # Display total workouts and average duration
-        total_workouts = df['title'].nunique()
-        average_duration = df['duration_minutes'].mean()
-        st.metric(label="Total Workouts", value=total_workouts)
-        st.metric(label="Average Workout Duration (minutes)", value=f"{average_duration:.2f}")
-        
-        # Display the most common exercises
-        common_exercises = df['exercise_title'].value_counts().nlargest(5)
-        st.subheader("Most Common Exercises")
-        fig, ax = plt.subplots()
-        sns.barplot(x=common_exercises.values, y=common_exercises.index, ax=ax)
-        plt.xlabel("Frequency")
-        plt.ylabel("Exercise")
-        st.pyplot(fig)
-        
-        # Calendar view of workouts
-        workout_dates = df['start_time'].dt.date.value_counts()
-        workout_dates = workout_dates.reset_index()
-        workout_dates.columns = ['date', 'count']
-        st.subheader("Workout Calendar")
-        fig = px.scatter(workout_dates, x='date', y='count', size='count', title="Workouts by Date")
-        st.plotly_chart(fig)
-        
+        cols = st.columns(3)
+        with cols[0]:
+            ui.metric_card(title="Total Workouts", content=total_workouts, key="card1")
+        with cols[1]:
+            ui.metric_card(title="Average Workout Time", content=average_duration, key="card2")
+        with cols[2]:
+            ui.metric_card(title="Longest Streak (weeks)", content=longest_streak, key="card3")
+    
     except Exception as e:
         st.error(f"Es gab ein Problem beim Lesen der Datei: {e}")
