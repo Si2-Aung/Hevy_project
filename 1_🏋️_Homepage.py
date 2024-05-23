@@ -1,9 +1,8 @@
 import pandas as pd
 import streamlit as st
-import plotly.express as px
-import seaborn as sns
-import matplotlib.pyplot as plt
 import streamlit_shadcn_ui as ui
+import Calender_Calculator
+import Spidergram_creater
 
 # Set the page configuration
 st.set_page_config(
@@ -37,7 +36,7 @@ def calculate_average_duration(workout_data):
     workout_data['end_time'] = pd.to_datetime(workout_data['end_time'], format="%d %b %Y, %H:%M", dayfirst=True)
     # Calculate duration in minutes for each workout
     workout_data['duration_minutes'] = (workout_data['end_time'] - workout_data['start_time']).dt.total_seconds() / 60
-    result = str(round(workout_data['duration_minutes'].mean()))+ " minutes"
+    result = str(round(workout_data['duration_minutes'].mean()))+ " min"
     return result
 
 # Function to calculate longest streak
@@ -58,7 +57,6 @@ def calculate_longest_streak(workout_data):
             current_streak = 1
     return str(max(longest_streak, current_streak))
 
-
 # Allow the user to upload a CSV file
 csv_file = st.file_uploader("Upload your Hevy-CSV file",type="csv")
 
@@ -73,20 +71,27 @@ else:
         workout_data = None
 
 if workout_data is not None:
-    try:
-        st.header("Overview")
+
+    st.header("Overview")
+
+    total_workouts = calculate_total_workouts(workout_data)
+    average_duration = calculate_average_duration(workout_data)
+    longest_streak = calculate_longest_streak(workout_data)
+
+
+    cols = st.columns(3)
+    with cols[0]:
+        ui.metric_card(title="Total Workouts", content=total_workouts, key="card1")
+    with cols[1]:
+        ui.metric_card(title="Average Workout Time", content=average_duration, key="card2")
+    with cols[2]:
+        ui.metric_card(title="Longest Streak in weeks", content=longest_streak, key="card3")
     
-        total_workouts = calculate_total_workouts(workout_data)
-        average_duration = calculate_average_duration(workout_data)
-        longest_streak = calculate_longest_streak(workout_data)
-        
-        cols = st.columns(3)
-        with cols[0]:
-            ui.metric_card(title="Total Workouts", content=total_workouts, key="card1")
-        with cols[1]:
-            ui.metric_card(title="Average Workout Time", content=average_duration, key="card2")
-        with cols[2]:
-            ui.metric_card(title="Longest Streak (weeks)", content=longest_streak, key="card3")
-    
-    except Exception as e:
-        st.error(f"Es gab ein Problem beim Lesen der Datei: {e}")
+    col1, col2 = st.columns(2)
+    with col1:
+        st.subheader("Most tryhard month")
+        Calender_Calculator.create_calander(workout_data)
+
+    with col2:
+        st.subheader('Focued muscle groups')
+        Spidergram_creater.main()
