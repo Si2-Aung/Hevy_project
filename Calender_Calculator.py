@@ -28,7 +28,7 @@ def create_calendar(year, month, highlight_days):
     month_name = calendar.month_name[month]
     days = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su']
     
-        # Create table header
+    # Create table header
     header = f"""
     <table style='border-collapse: collapse; width: 50%; background-color: white; color: black;'>
         <tr>
