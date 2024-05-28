@@ -1,6 +1,8 @@
 import streamlit as st
 import matplotlib.pyplot as plt
 import numpy as np
+import Exercises
+import pandas as pd
 
 def create_radar_chart(labels, stats):
     num_vars = len(labels)
@@ -15,7 +17,7 @@ def create_radar_chart(labels, stats):
     fig, ax = plt.subplots(figsize=(4, 4), subplot_kw=dict(polar=True))
     
     # Füllfarbe auf kräftiges Dunkelblau setzen
-    ax.fill(angles, stats,alpha=0.7, color= "black", edgecolor='darkblue', linewidth=2)
+    ax.fill(angles, stats,alpha=0.7, color= "green", edgecolor='lightblue', linewidth=2)
 
     # Schönheitsverbesserungen
     ax.set_yticklabels([])  # Remove radial labels
@@ -33,14 +35,12 @@ def create_radar_chart(labels, stats):
 
     return fig
 
-def main():
+def main(workout_data: pd.DataFrame):
     # Daten für das Diagramm
-    labels = np.array(['Rücken', 'Brust', 'Core', 'Arme', 'Schultern', 'Beine', "Cardio"])
-    stats = np.array([6, 2, 5, 3, 4, 5, 3])
-
+    labels = np.array(['Core', 'Beine', 'Arme', 'Rücken', 'Cardio', 'Brust', "Schultern"])
+    stats = Exercises.calculate_stats(workout_data)
     # Streamlit App
     fig = create_radar_chart(labels, stats)
     st.pyplot(fig)
-
-if __name__ == "__main__":
-    main()
+    #show stats
+    st.dataframe(stats.to_frame().T)
