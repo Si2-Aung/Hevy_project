@@ -5,30 +5,30 @@ import Calender_Calculator
 import Spidergram_creater
 
 # Set the page configuration
-def setPage():    
-    st.set_page_config(
-        page_title="Hevy Dashboard",
-        page_icon="🏋️"
-    )
-    st.sidebar.success("Select a page above")
-    st.header("Overview")
-    # CSS for background image
-    background_image = """
-    <style>
-    [data-testid="stAppViewContainer"] > .main {
-        background-image: url("");
-        background-position: center;  
-        background-repeat: no-repeat;
-    }
-    </style>
-    """
-    st.markdown(background_image, unsafe_allow_html=True)
+st.set_page_config(
+page_title="Hevy Dashboard",
+page_icon="🏋️")
+st.sidebar.success("Select a page above")
+st.header("Overview")
+# CSS for background image
+background_image = """
+<style>
+[data-testid="stAppViewContainer"] > .main {
+background-image: url("");
+background-position: center;  
+background-repeat: no-repeat;
+}
+</style>
+"""
+st.markdown(background_image, unsafe_allow_html=True)
+    
 # Function to filter data by the number of months
 def filter_data_by_months(workout_data, months):
     if months == 0:
         return workout_data
     else:
-        workout_data['start_time'] = pd.to_datetime(workout_data['start_time'], format="%d %b %Y, %H:%M", dayfirst=True)
+        workout_data = workout_data.copy()
+        workout_data.loc[:, 'start_time'] = pd.to_datetime(workout_data['start_time'], format="%d %b %Y, %H:%M", dayfirst=True)
         latest_date = workout_data['start_time'].max()
         start_date = latest_date - pd.DateOffset(months=months)
         return workout_data[workout_data['start_time'] >= start_date]
@@ -67,7 +67,7 @@ def calculate_longest_streak(workout_data):
 
 def get_csv_file():
     # Allow the user to upload a CSV file
-    csv_file = st.file_uploader("",type="csv")
+    csv_file = st.file_uploader("hi",type="csv",label_visibility="collapsed")
     if csv_file is not None:
         st.success("Datei erfolgreich hochgeladen!")
         workout_data = pd.read_csv(csv_file)
@@ -80,22 +80,19 @@ def get_csv_file():
     return workout_data  
 
 def main():
-    setPage()
     workout_data = get_csv_file()
 
     if workout_data is not None:
         # Slider hinzufügen
         slider_value = st.slider(
-            label="Wähle die Anzahl der Monate",
+            label="Anzahl der Monate die Berücksichtigt werden sollen: 0 = Alle Monate",
             min_value=0,
             max_value=12,
             value=0,  # Standardwert
-            step=1  # Schrittweite
+            step=1,  # Schrittweite
         )
-        
-        # Filter workout data based on slider value
         workout_data = filter_data_by_months(workout_data, slider_value)
-
+        # Filter workout data based on slider value
         total_workouts = calculate_total_workouts(workout_data)
         average_duration = calculate_average_duration(workout_data)
         longest_streak = calculate_longest_streak(workout_data)
@@ -116,6 +113,7 @@ def main():
         with col2:
             st.subheader('Focued muscle groups')
             Spidergram_creater.main(workout_data)
+
 
     else:
         st.error("Please upload a file to get started")

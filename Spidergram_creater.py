@@ -11,13 +11,13 @@ def create_radar_chart(labels, stats):
     angles = np.linspace(0, 2 * np.pi, num_vars, endpoint=False).tolist()
 
     # Der Radarplot soll rund sein, also müssen wir die Liste schließen
-    stats = np.concatenate((stats, [stats[0]]))
+    stats = np.concatenate((stats, [stats.iloc[0]]))  # Verwendung von iloc
     angles += angles[:1]
 
     fig, ax = plt.subplots(figsize=(4, 4), subplot_kw=dict(polar=True))
     
     # Füllfarbe auf kräftiges Dunkelblau setzen
-    ax.fill(angles, stats,alpha=0.7, color= "green", edgecolor='lightblue', linewidth=2)
+    ax.fill(angles, stats, alpha=0.7, color="#85d7d3", edgecolor='#696969', linewidth=2)
 
     # Schönheitsverbesserungen
     ax.set_yticklabels([])  # Remove radial labels
