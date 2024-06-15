@@ -3,6 +3,7 @@ import streamlit as st
 import streamlit_shadcn_ui as ui
 import Calender_Calculator
 import Spidergram_creater
+import matplotlib.pyplot as plt
 
 # Set the page configuration
 st.set_page_config(
@@ -71,6 +72,32 @@ def calculate_longest_streak(workout_data):
     
     return max_streak
 
+def calculate_top_exercises(workout_data):
+    exercise_counts = workout_data['exercise_title'].value_counts()
+    top_exercises = exercise_counts.head(3)
+    sorted_exercises = top_exercises.sort_values(ascending=False)
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+    bars = ax.bar(['2nd Most Trained', 'Most Trained', '3rd Most Trained'], 
+               [sorted_exercises.values[1], sorted_exercises.values[0], sorted_exercises.values[2]], 
+               color=['silver', 'gold', 'brown'], width=0.5)
+    bars[1].set_color('gold')    # Middle (most trained) bar in gold
+    bars[0].set_color('silver')  # Left (second most trained) bar in silver
+    bars[2].set_color('brown')   # Right (third most trained) bar in brown
+    plt.xticks([0, 1, 2], sorted_exercises.index, fontsize=8)
+    # Add numbers on top of the bars
+    for bar in bars:
+        height = bar.get_height()
+        plt.text(bar.get_x() + bar.get_width() / 2.0, height, f'{int(height)}', ha='center', va='bottom')
+
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.spines['left'].set_visible(False)
+    ax.spines['bottom'].set_visible(False)
+    ax.yaxis.set_visible(False)
+    
+    plt.subplots_adjust(left=0.1, right=0.6, top=0.2, bottom=0.1)
+    return fig
 
 def get_csv_file():
     # Allow the user to upload a CSV file
@@ -121,6 +148,9 @@ def main():
             st.subheader('Focused muscle groups')
             Spidergram_creater.main(workout_data)
 
+        st.subheader("Top 3 Exercises")
+        fig = calculate_top_exercises(workout_data)
+        st.pyplot(fig)
 
     else:
         st.error("Please upload a file to get started")
