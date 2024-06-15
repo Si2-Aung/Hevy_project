@@ -49,21 +49,28 @@ def calculate_average_duration(workout_data):
 
 # Function to calculate longest streak
 def calculate_longest_streak(workout_data):
-    workout_data['workout_week'] = workout_data['start_time'].dt.isocalendar().week
-    workout_data['workout_year'] = workout_data['start_time'].dt.isocalendar().year
-    workout_data['year_week'] = workout_data['workout_year'].astype(str) + "-" + workout_data['workout_week'].astype(str)
-    
-    streaks = workout_data['year_week'].value_counts().sort_index().index
-    longest_streak = 1
-    current_streak = 1
-    
-    for i in range(1, len(streaks)):
-        if int(streaks[i].split("-")[1]) - int(streaks[i-1].split("-")[1]) == 1:
+    # Processing datetime data
+    workouts_df = workout_data.copy()
+    workouts_df['start_time'] = pd.to_datetime(workouts_df['start_time'], format='%d %b %Y, %H:%M')
+    workouts_df['year'] = workouts_df['start_time'].dt.isocalendar().year
+    workouts_df['week'] = workouts_df['start_time'].dt.isocalendar().week
+    weekly_workouts = workouts_df.groupby(['year', 'week']).size().reset_index(name='workout_count')
+
+    weekly_workouts = weekly_workouts.sort_values(by=['year', 'week']).reset_index(drop=True)
+    max_streak = 0
+    current_streak = 0
+    previous_week = None
+    for _, row in weekly_workouts.iterrows():
+        year, week = row['year'], row['week']
+        if previous_week is None or (year == previous_week[0] and week == previous_week[1] + 1) or (year == previous_week[0] + 1 and week == 1 and previous_week[1] == 52):
             current_streak += 1
         else:
-            longest_streak = max(longest_streak, current_streak)
             current_streak = 1
-    return str(max(longest_streak, current_streak))
+        max_streak = max(max_streak, current_streak)
+        previous_week = (year, week)
+    
+    return max_streak
+
 
 def get_csv_file():
     # Allow the user to upload a CSV file
@@ -111,7 +118,7 @@ def main():
             Calender_Calculator.create_calander(workout_data)
 
         with col2:
-            st.subheader('Focued muscle groups')
+            st.subheader('Focused muscle groups')
             Spidergram_creater.main(workout_data)
 
 

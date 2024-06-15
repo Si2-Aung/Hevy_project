@@ -17,7 +17,7 @@ def create_radar_chart(labels, stats):
     fig, ax = plt.subplots(figsize=(4, 4), subplot_kw=dict(polar=True))
     
     # Füllfarbe auf kräftiges Dunkelblau setzen
-    ax.fill(angles, stats, alpha=0.7, color="#85d7d3", edgecolor='#696969', linewidth=2)
+    ax.fill(angles, stats, alpha=0.7, color="#85d7d3", edgecolor='#234623', linewidth=2)
 
     # Schönheitsverbesserungen
     ax.set_yticklabels([])  # Remove radial labels
@@ -42,5 +42,5 @@ def main(workout_data: pd.DataFrame):
     # Streamlit App
     fig = create_radar_chart(labels, stats)
     st.pyplot(fig)
-    #show stats
-    st.dataframe(stats.to_frame().T)
+"""    #show stats
+    st.dataframe(stats.to_frame().T)"""
