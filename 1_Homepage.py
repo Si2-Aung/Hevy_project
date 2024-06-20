@@ -5,24 +5,6 @@ import Calender_Calculator
 import Spidergram_creater
 import matplotlib.pyplot as plt
 
-# Set the page configuration
-st.set_page_config(
-page_title="Hevy Dashboard",
-page_icon="🏋️")
-st.sidebar.success("Select a page above")
-st.header("Overview")
-# CSS for background image
-background_image = """
-<style>
-[data-testid="stAppViewContainer"] > .main {
-background-image: url("");
-background-position: center;  
-background-repeat: no-repeat;
-}
-</style>
-"""
-st.markdown(background_image, unsafe_allow_html=True)
-    
 # Function to filter data by the number of months
 def filter_data_by_months(workout_data, months):
     if months == 0:
@@ -79,11 +61,8 @@ def calculate_top_exercises(workout_data):
 
     fig, ax = plt.subplots(figsize=(10, 6))
     bars = ax.bar(['2nd Most Trained', 'Most Trained', '3rd Most Trained'], 
-               [sorted_exercises.values[1], sorted_exercises.values[0], sorted_exercises.values[2]], 
-               color=['silver', 'gold', 'brown'], width=0.5)
-    bars[1].set_color('gold')    # Middle (most trained) bar in gold
-    bars[0].set_color('silver')  # Left (second most trained) bar in silver
-    bars[2].set_color('brown')   # Right (third most trained) bar in brown
+            [sorted_exercises.values[1], sorted_exercises.values[0], sorted_exercises.values[2]], 
+            color=['silver', '#FFD700', 'brown'], width=1)
     plt.xticks([0, 1, 2], sorted_exercises.index, fontsize=8)
     # Add numbers on top of the bars
     for bar in bars:
@@ -95,8 +74,8 @@ def calculate_top_exercises(workout_data):
     ax.spines['left'].set_visible(False)
     ax.spines['bottom'].set_visible(False)
     ax.yaxis.set_visible(False)
-    
-    plt.subplots_adjust(left=0.1, right=0.6, top=0.2, bottom=0.1)
+
+    plt.subplots_adjust(left=0.1, right=0.6, top=0.22, bottom=0.1)
     return fig
 
 def get_csv_file():
@@ -104,6 +83,7 @@ def get_csv_file():
     csv_file = st.file_uploader("hi",type="csv",label_visibility="collapsed")
     if csv_file is not None:
         st.success("Datei erfolgreich hochgeladen!")
+        st.title("Overview")
         workout_data = pd.read_csv(csv_file)
         st.session_state['uploaded_data'] = workout_data
     else:
@@ -114,6 +94,11 @@ def get_csv_file():
     return workout_data  
 
 def main():
+    st.set_page_config(
+    page_title="Hevy Dashboard",
+    page_icon="🚀"
+    )
+    st.sidebar.success("Select a page above")
     workout_data = get_csv_file()
 
     if workout_data is not None:
@@ -131,6 +116,10 @@ def main():
         average_duration = calculate_average_duration(workout_data)
         longest_streak = calculate_longest_streak(workout_data)
 
+        st.markdown("<h3 style='text-align: center;'>Top 3 Excersises</h2>", unsafe_allow_html=True)
+        fig = calculate_top_exercises(workout_data)
+        st.pyplot(fig)   
+
         cols = st.columns(3)
         with cols[0]:
             ui.metric_card(title="Total Workouts", content=total_workouts, key="card1")
@@ -139,6 +128,7 @@ def main():
         with cols[2]:
             ui.metric_card(title="Longest Streak in weeks", content=longest_streak, key="card3")
         
+
         col1, col2 = st.columns(2)
         with col1:
             st.subheader("Most tryhard month")
@@ -147,10 +137,7 @@ def main():
         with col2:
             st.subheader('Focused muscle groups')
             Spidergram_creater.main(workout_data)
-
-        st.subheader("Top 3 Exercises")
-        fig = calculate_top_exercises(workout_data)
-        st.pyplot(fig)
+        
 
     else:
         st.error("Please upload a file to get started")
