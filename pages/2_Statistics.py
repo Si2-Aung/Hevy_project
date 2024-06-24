@@ -94,7 +94,10 @@ def main():
                     ui.metric_card(title="Personal best", content= personal_best, key="card1")
                 with cols[1]:
                     ui.metric_card(title="Total volume lifted", content=total_volume_lifted, key="card2")
+                st.warning("No data available for the selected exercise.")
             else:
                 st.warning("Sry, Exercises without weights are not included...yet")
+    
+
             
 main()
