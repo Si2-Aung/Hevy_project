@@ -140,7 +140,8 @@ def main():
         
 
     else:
-        st.error("Please upload a file to get started")
+        st.error("Please upload a Workout Data to get started")
+        st.markdown('     Log in at [Hevy](https://hevy.com), navigate to Settings, select "Export Data" to download your CSV file.')    
 
     
 main()
