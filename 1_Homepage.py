@@ -103,10 +103,12 @@ def main():
 
     if workout_data is not None:
         # Slider hinzufügen
+        workout_data['start_time'] = pd.to_datetime(workout_data['start_time'], format="%d %b %Y, %H:%M", dayfirst=True)
+        max_months_available = (workout_data['start_time'].max() - workout_data['start_time'].min()).days // 30
         slider_value = st.slider(
             label="Anzahl der Monate die Berücksichtigt werden sollen: 0 = Alle Monate",
             min_value=0,
-            max_value=12,
+            max_value=min(12, max_months_available),
             value=0,  # Standardwert
             step=1,  # Schrittweite
         )

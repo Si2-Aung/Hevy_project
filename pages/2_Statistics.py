@@ -74,11 +74,13 @@ def main():
     st.title("Exercise Statistics")
     st.sidebar.success("Select a page above")
     workout_data = get_workout_data()
+    workout_data['start_time'] = pd.to_datetime(workout_data['start_time'], format="%d %b %Y, %H:%M", dayfirst=True)
+    max_months_available = (workout_data['start_time'].max() - workout_data['start_time'].min()).days // 30
     if workout_data is not None:
         slider_value = st.slider(
             label="Anzahl der Monate die Berücksichtigt werden sollen: 0 = Alle Monate",
             min_value=0,
-            max_value=12,
+            max_value=min(12, max_months_available),
             value=0,  # Standardwert
             step=1,  # Schrittweite
         )
@@ -96,7 +98,7 @@ def main():
                     ui.metric_card(title="Total volume lifted", content=total_volume_lifted, key="card2")
             else:
                 st.warning("Sry, Exercises without weights are not included...yet")
-    st.warning("Ich wollte noch mehr machen aber bin zu faul")
+    st.warning("Ich wollte noch mehr machen aber bin zu faul 😭")
 
 
             
